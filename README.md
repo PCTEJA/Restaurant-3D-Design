@@ -28,7 +28,7 @@ python -m http.server 4173 --directory dist
 
 Open **http://localhost:4173**. On Windows, use `py` instead of `python` if needed. Serve the site over HTTP; opening `index.html` directly does not provide the module and model loading environment it needs.
 
-The repository is private, so cloning requires an authenticated account with access.
+The repository is public and can be cloned without authentication.
 
 > The active model is approximately **83 MB** (79 MiB). The initial load can take time on slower connections, and interactive performance depends on the device's graphics capabilities.
 
@@ -113,6 +113,21 @@ The final stills use Eevee at 1800 × 1200 with 128 temporal samples. The origin
 The browser uses a real-time approximation of the Blender materials and lighting. Blender height-based bump shading is not preserved by the current export, and gallery lighting is a presentation adjustment rather than a physical simulation of changing daylight.
 
 ## Hosting
+
+### Cloudflare Workers Free
+
+Run `npm ci` followed by `npm run deploy`. The configuration targets the
+Pcteja1028 Cloudflare account and publishes only static assets; it does not
+enable a paid service. Sign into that account with Wrangler before deploying.
+
+`npm run build` prepares `.cloudflare-dist/`, using the Draco-compressed
+7.82 MB model in place of the original 82.69 MB model. The original stays in
+`dist/assets/heritage-a01.glb` for editing. The local Draco decoder is bundled
+with the site. The build verifies that every published asset is under 25 MiB.
+
+For Cloudflare Git builds, use `npm run build` as the build command and
+`npx wrangler deploy` as the deploy command, with the repository root directory.
+The deployment name is `sha-sha-heritage-bistro`.
 
 Deploy the contents of **`dist/`** to a static host. Keep `assets/`, `vendor/`, and `utils/` alongside `index.html`; no server-side application or build command is required. Relative asset paths support hosting beneath a repository subpath.
 

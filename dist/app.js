@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
+import { DRACOLoader } from './vendor/DRACOLoader.js';
 import { RoomEnvironment } from './vendor/RoomEnvironment.js';
 const $=s=>document.querySelector(s), canvas=$('#scene'), container=$('.experience');
 let renderView=true;
@@ -32,7 +33,7 @@ function stopTour(){touring=false;$('#tour').textContent='▶ Guided tour';}
 function setCut(on){cutaway=on;renderer.clippingPlanes=on?[new THREE.Plane(new THREE.Vector3(0,-1,0),2.7),new THREE.Plane(new THREE.Vector3(-1,0,0),1.35)]:[];$('#cut').setAttribute('aria-pressed',String(on));}
 function go(i,auto=false){if(!ready)return;showRender(false);if(!auto)stopTour();setCut(false);selected=i;const s=stops[i];moveTo(s.p,s.t);$('#title').textContent=s.title;$('#description').textContent=s.description;$('#number').textContent=`0${i+1} / 05`;$('.stops').querySelectorAll('button').forEach((b,n)=>{b.classList.toggle('active',n===i);b.setAttribute('aria-current',n===i?'step':'false');});$('#marker').style.bottom=[2,9,36,65,88][i]+'%';tourAt=performance.now();}
 camera.position.set(...stops[1].p);camera.lookAt(...stops[1].t);syncAngles();
-new GLTFLoader().load('./assets/heritage-a01.glb',g=>{model=g.scene;finishMaterials(model);scene.add(model);model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.name.startsWith('Ceiling')||o.name.startsWith('Wall_shell')||o.name.startsWith('Rear_wall'))hidden.push(o);if(o.material){o.material.side=THREE.DoubleSide;}}});ready=true;$('#loading').style.display='none';const keepRenderView=renderView;go(1);showRender(keepRenderView);window.walkthrough={scene,camera,model,go,getState:()=>({selected,cutaway,touring,ready,meshes:renderer.info.render.calls})};},undefined,e=>{$('#loading').innerHTML='<strong>The model could not load</strong><small>Please reload this page to try again.</small>';console.error(e);});
+new GLTFLoader().setDRACOLoader(new DRACOLoader().setDecoderPath('./vendor/draco/')).load('./assets/heritage-a01.glb',g=>{model=g.scene;finishMaterials(model);scene.add(model);model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.name.startsWith('Ceiling')||o.name.startsWith('Wall_shell')||o.name.startsWith('Rear_wall'))hidden.push(o);if(o.material){o.material.side=THREE.DoubleSide;}}});ready=true;$('#loading').style.display='none';const keepRenderView=renderView;go(1);showRender(keepRenderView);window.walkthrough={scene,camera,model,go,getState:()=>({selected,cutaway,touring,ready,meshes:renderer.info.render.calls})};},undefined,e=>{$('#loading').innerHTML='<strong>The model could not load</strong><small>Please reload this page to try again.</small>';console.error(e);});
 document.querySelectorAll('[data-stop]').forEach(b=>b.onclick=()=>go(Number(b.dataset.stop)));
 $('#reset').onclick=()=>go(selected);
 $('#tour').onclick=()=>{if(touring){stopTour();return;}touring=true;$('#tour').textContent='Ⅱ Pause tour';go(0,true);};
